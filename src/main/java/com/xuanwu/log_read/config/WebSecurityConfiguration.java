@@ -6,9 +6,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-@SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -16,33 +16,33 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-			.authorizeRequests()
-				.antMatchers("/css/**", "/js/**", "/img/**").permitAll()
-				.anyRequest().authenticated();
-		http
-			.csrf()
-				.disable()
-			.formLogin()
-				.defaultSuccessUrl("/index.html")
-				.permitAll()
-				.and()
-			.logout()
-				.logoutSuccessUrl("/login.html?logout")
-				.permitAll();
+		.authorizeRequests()
+			.antMatchers("/css/**", "/js/**", "/img/**").permitAll()
+			.anyRequest().authenticated();
+	http
+		.csrf()
+			.disable()
+		.formLogin()
+			.defaultSuccessUrl("/index.html")
+			.loginPage("/login.html")
+			.failureUrl("/login.html?error")
+			.permitAll()
+			.and()
+		.logout()
+			.logoutSuccessUrl("/login.html?logout")
+			.permitAll();
 	}
-
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth
-			.inMemoryAuthentication()
-				.withUser("albert").password("123456").roles("USER").and()
-				.withUser("foo").password("123456").roles("USER");
+		auth.inMemoryAuthentication().withUser("albert").password("$2a$10$yoN98EJ7oazDLKktwaJfNeZZ/tvD/YFtpeTq/tdizN.ykBW6u77t.").roles("USER").and().withUser("foo")
+				.password("$2a$10$yoN98EJ7oazDLKktwaJfNeZZ/tvD/YFtpeTq/tdizN.ykBW6u77t.").roles("USER");
 	}
 	
 	@Bean
-	public static NoOpPasswordEncoder passwordEncoder() {
-	  return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
+
 
 }
